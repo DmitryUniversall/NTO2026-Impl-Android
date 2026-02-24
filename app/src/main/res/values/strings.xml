@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Work</string>
+    <string name="title_activity_root">RootActivity</string>
+    <string name="auth_title">Привет! Введи код для авторизации</string>
+    <string name="auth_label">Код</string>
+    <string name="auth_sign_in">Войти</string>
+
+    <string name="main_refresh">Обновить</string>
+    <string name="main_logout">Выйти</string>
+    <string name="main_add">Добавить</string>
+
+    <string name="book_add">Забронировать</string>
+    <string name="book_back">Назад</string>
+    <string name="book_empty">Всё забронировано</string>
+</resources>
