@@ -3,9 +3,11 @@ package ru.myitschool.work.domain.auth
 import ru.myitschool.work.data.repo.AuthRepository
 
 class LogoutUseCase(
-    private val repository: AuthRepository
+    private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke() {
-        repository.logout()
+    suspend operator fun invoke(): Result<Unit> {
+        return runCatching {
+            authRepository.logout()
+        }
     }
 }

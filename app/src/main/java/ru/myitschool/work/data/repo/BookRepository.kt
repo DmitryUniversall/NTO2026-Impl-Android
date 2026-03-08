@@ -1,33 +1,25 @@
 package ru.myitschool.work.data.repo
 
-import ru.myitschool.work.data.dto.BookRequestDto
+import ru.myitschool.work.data.dto.book.BookRequestDTO
 import ru.myitschool.work.data.source.NetworkDataSource
 import ru.myitschool.work.domain.book.entities.BookRequestData
 import ru.myitschool.work.domain.book.entities.BookingData
-import ru.myitschool.work.domain.main.entities.MainInfoEntity
+import ru.myitschool.work.domain.book.entities.UserBookingData
 
-class BookRepository(
-    private val authRepository: AuthRepository
-) {
-    suspend fun getInfo(): Result<MainInfoEntity> {
-        val code = authRepository.getCode() ?: return getNoAuthResult()
-        return NetworkDataSource.getInfo(code).mapCatching { dto ->
-            MainInfoEntity(
-                name = dto.name ?: error("Name is null"),
-                photoUrl = dto.photoUrl ?: error("Photo url is null"),
-                book = dto.booking?.mapNotNull { (date, place) ->
-                    MainInfoEntity.Book(
-                        date = date,
-                        place = place.place ?: return@mapNotNull null
-                    )
-                } ?: listOf()
-            )
+object BookRepository {
+    suspend fun getUserBookings(): Result<List<UserBookingData>> {
+        return NetworkDataSource.getUserBookings().mapCatching { dto ->
+            dto?.map { (date, placeDto) ->
+                UserBookingData(
+                    date = date,
+                    place = placeDto.toEntity()
+                )
+            } ?: error("map is null")
         }
     }
 
-    suspend fun getBookingInfo(): Result<List<BookingData>> {
-        val code = authRepository.getCode() ?: return getNoAuthResult()
-        return NetworkDataSource.getBooking(code).mapCatching { dto ->
+    suspend fun getDailyBookingInfo(): Result<List<BookingData>> {
+        return NetworkDataSource.getAvailablePlaces().mapCatching { dto ->
             dto?.map { (date, places) ->
                 BookingData(
                     date = date,
@@ -42,12 +34,8 @@ class BookRepository(
         }
     }
 
-    suspend fun sendBook(data: BookRequestData): Result<Boolean> {
-        val code = authRepository.getCode() ?: return getNoAuthResult()
-        val dto = BookRequestDto(data.date, data.placeId)
-        return NetworkDataSource.addBook(code, dto)
+    suspend fun book(data: BookRequestData): Result<Boolean> {
+        val dto = BookRequestDTO(data.date, data.placeId)
+        return NetworkDataSource.book(dto)
     }
-    private fun <T> getNoAuthResult() = Result.failure<T>(
-        IllegalStateException("No auth")
-    )
 }

@@ -1,5 +1,6 @@
 package ru.myitschool.work.ui.screen.book
 
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toPersistentList
@@ -10,17 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.myitschool.work.data.repo.AuthRepository
+import ru.myitschool.work.App
 import ru.myitschool.work.data.repo.BookRepository
-import ru.myitschool.work.domain.book.GetBookingDataUseCase
+import ru.myitschool.work.domain.book.GetDailyBookingDataUseCase
 import ru.myitschool.work.domain.book.SendBookRequestUseCase
 import ru.myitschool.work.domain.book.entities.BookRequestData
-import kotlin.getValue
 
 class BookViewModel : ViewModel() {
-    private val bookRepository by lazy { BookRepository(AuthRepository) }
-    private val getBookingDataUseCase by lazy { GetBookingDataUseCase(bookRepository) }
-    private val sendBookRequestUseCase by lazy { SendBookRequestUseCase(bookRepository) }
+    private val getDailyBookingDataUseCase by lazy { GetDailyBookingDataUseCase(BookRepository) }
+    private val sendBookRequestUseCase by lazy { SendBookRequestUseCase(BookRepository) }
+
     private val _uiState = MutableStateFlow<BookState>(BookState.Loading)
     val uiState: StateFlow<BookState> = _uiState.asStateFlow()
 
@@ -50,6 +50,7 @@ class BookViewModel : ViewModel() {
                         },
                         onFailure = { error ->
                             error.printStackTrace()
+                            Toast.makeText(App.context, error.message ?: "Unknown book error", Toast.LENGTH_LONG).show()
                         }
                     )
                 }
@@ -61,25 +62,23 @@ class BookViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { BookState.Loading }
             _uiState.update {
-                getBookingDataUseCase.invoke().fold(
+                getDailyBookingDataUseCase.invoke().fold(
                     onSuccess = { data ->
-                        if (data.isEmpty()) {
-                            BookState.Empty
-                        } else {
-                            BookState.Data(
-                                items = data.map { item ->
-                                    BookState.Data.Item(
-                                        date = item.date,
-                                        places = item.places.map { place ->
-                                            BookState.Data.Place(
-                                                id = place.id,
-                                                name = place.name
-                                            )
-                                        }.toPersistentList()
-                                    )
-                                }.toPersistentList()
-                            )
-                        }
+                        if (data.isEmpty()) return@fold BookState.Empty
+
+                        BookState.Data(
+                            items = data.map { item ->
+                                BookState.Data.Item(
+                                    date = item.date,
+                                    places = item.places.map { place ->
+                                        BookState.Data.Place(
+                                            id = place.id,
+                                            name = place.name
+                                        )
+                                    }.toPersistentList()
+                                )
+                            }.toPersistentList()
+                        )
                     },
                     onFailure = { error ->
                         BookState.Error(

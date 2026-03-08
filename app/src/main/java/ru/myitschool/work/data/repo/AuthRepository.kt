@@ -1,51 +1,74 @@
 package ru.myitschool.work.data.repo
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import android.util.Base64
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import ru.myitschool.work.App
+import ru.myitschool.work.data.dto.login.LoginRequestDTO
+import ru.myitschool.work.data.source.LocalDataSource
 import ru.myitschool.work.data.source.NetworkDataSource
+import ru.myitschool.work.domain.auth.entities.AuthState
+import ru.myitschool.work.domain.auth.entities.LocalAuthInfo
 
 object AuthRepository {
-    private const val STORE = "AUTH-STORE"
-    private const val CODE_KEY = "CODE"
+    private val _authStateFlow = MutableStateFlow<AuthState>(AuthState.Unknown)
+    val authState = _authStateFlow.asStateFlow()
 
-    private var codeCache: String? = null
+    fun generateBasicAuthToken(login: String, password: String): String {
+        val credentials = "$login:$password"
+        return Base64.encodeToString(credentials.toByteArray(Charsets.UTF_8), Base64.DEFAULT).replace("\n", "")
+    }
 
-    suspend fun checkAndSave(text: String): Result<Boolean> {
-        return NetworkDataSource.checkAuth(text).onSuccess { success ->
-            if (success) {
-                codeCache = text
-                App.context.userDataStore.edit { preferences ->
-                    val prefKey = stringPreferencesKey(CODE_KEY)
-                    preferences[prefKey] = text
-                }
-            }
+    suspend fun restoreAuthState(): AuthState {
+        val authInfo = LocalDataSource.loadLocalAuthInfo()
+            ?: return AuthState.Unauthenticated
+
+        val token = authInfo.basicToken
+
+        val user = NetworkDataSource.getMeUsingToken(token).getOrThrow().user?.toEntity()
+            ?: error("No user field found in getMe response")
+
+        val state = AuthState.Authenticated(
+            basicToken = token,
+            user = user
+        )
+
+        _authStateFlow.emit(state)
+        return state
+    }
+
+    suspend fun login(login: String, password: String): Result<AuthState.Authenticated> {
+        val dto = LoginRequestDTO(login = login, password = password)
+        return NetworkDataSource.login(dto).mapCatching { dto ->
+            val state = AuthState.Authenticated(
+                basicToken = generateBasicAuthToken(login, password),
+                user = dto.user?.toEntity() ?: error("No user field found in login response")
+            )
+
+            _authStateFlow.emit(state)
+
+            LocalDataSource.saveAuthInfo(
+                LocalAuthInfo(
+                    basicToken = state.basicToken
+                )
+            )
+
+            state
         }
     }
 
-    suspend fun getCode(): String? {
-        if (codeCache == null) {
-            codeCache = App.context.userDataStore.data
-                .firstOrNull()
-                ?.let { preferences ->
-                    preferences[stringPreferencesKey(CODE_KEY)]
-                }
-        }
-        return codeCache
+    suspend fun getAuthToken(): String? {
+        val state = authState.firstOrNull()
+        if (state !is AuthState.Authenticated) return null
+        return state.basicToken
+    }
+
+    suspend fun clearAuthInfo() {
+        _authStateFlow.emit(AuthState.Unauthenticated)
+        LocalDataSource.clearAuthInfo()
     }
 
     suspend fun logout() {
-        codeCache = null
-        App.context.userDataStore.edit { preferences ->
-            val prefKey = stringPreferencesKey(CODE_KEY)
-            preferences.remove(prefKey)
-        }
+        clearAuthInfo()
     }
-
-    private val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name = STORE)
 }

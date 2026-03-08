@@ -41,7 +41,7 @@ fun AuthScreen(
     LaunchedEffect(Unit) {
         viewModel.actionFlow.collect { action ->
             when (action) {
-                is AuthAction.Open -> navController.navigate(action.destination) {
+                is AuthAction.Navigate -> navController.navigate(action.destination) {
                     popUpTo(0)
                 }
             }
@@ -60,6 +60,7 @@ fun AuthScreen(
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
+
         when (val currentState = state) {
             is AuthState.Data -> Content(viewModel, currentState)
             is AuthState.Loading -> {
@@ -76,27 +77,51 @@ private fun Content(
     viewModel: AuthViewModel,
     state: AuthState.Data
 ) {
-    var inputText by remember { mutableStateOf("") }
+    var loginInput by remember { mutableStateOf("") }
+    var passwordInput by remember { mutableStateOf("") }
+
     Spacer(modifier = Modifier.size(16.dp))
+
     TextField(
-        modifier = Modifier.testTag(TestIds.Auth.CODE_INPUT).fillMaxWidth(),
-        value = inputText,
+        modifier = Modifier
+            .testTag(TestIds.Auth.LOGIN_INPUT)
+            .fillMaxWidth(),
+        value = loginInput,
         onValueChange = {
-            inputText = it
-            viewModel.onIntent(AuthIntent.TextInput(it))
+            loginInput = it
+            viewModel.onIntent(AuthIntent.LoginInput(loginInput))
         },
-        label = { Text(stringResource(R.string.auth_label)) }
+        label = { Text(stringResource(R.string.auth_login_label)) }
     )
+
     Spacer(modifier = Modifier.size(16.dp))
+
+    TextField(
+        modifier = Modifier
+            .testTag(TestIds.Auth.PASSWORD_INPUT)
+            .fillMaxWidth(),
+        value = passwordInput,
+        onValueChange = {
+            passwordInput = it
+            viewModel.onIntent(AuthIntent.PasswordInput(passwordInput))
+        },
+        label = { Text(stringResource(R.string.auth_password_label)) }
+    )
+
+    Spacer(modifier = Modifier.size(16.dp))
+
     Button(
-        modifier = Modifier.testTag(TestIds.Auth.SIGN_BUTTON).fillMaxWidth(),
+        modifier = Modifier
+            .testTag(TestIds.Auth.SIGN_BUTTON)
+            .fillMaxWidth(),
         onClick = {
-            viewModel.onIntent(AuthIntent.Send(inputText))
+            viewModel.onIntent(AuthIntent.SendLogin(loginInput, passwordInput))
         },
         enabled = state.isEnabledSend
     ) {
         Text(stringResource(R.string.auth_sign_in))
     }
+
     if (state.error != null) {
         Text(
             modifier = Modifier.testTag(TestIds.Auth.ERROR),

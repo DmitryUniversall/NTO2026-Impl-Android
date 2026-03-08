@@ -21,12 +21,9 @@ import java.time.format.DateTimeFormatter
 import kotlin.getValue
 
 class MainViewModel : ViewModel() {
-    private val getMainDataUseCase by lazy {
-        GetMainDataUseCase(BookRepository(AuthRepository))
-    }
-    private val logoutUseCase by lazy {
-        LogoutUseCase(AuthRepository)
-    }
+    private val getMainDataUseCase by lazy {GetMainDataUseCase(AuthRepository, BookRepository) }
+    private val logoutUseCase by lazy { LogoutUseCase(AuthRepository) }
+
     private val _uiState = MutableStateFlow<MainState>(MainState.Loading)
     val uiState: StateFlow<MainState> = _uiState.asStateFlow()
 
@@ -34,7 +31,6 @@ class MainViewModel : ViewModel() {
     val actionFlow: SharedFlow<MainAction> = _actionFlow
 
     init {
-        println("!!!!!!!! refresh init")
         refresh()
     }
 
@@ -42,7 +38,7 @@ class MainViewModel : ViewModel() {
         when (intent) {
             is MainIntent.Add -> {
                 viewModelScope.launch {
-                    _actionFlow.emit(MainAction.Open(BookScreenDestination))
+                    _actionFlow.emit(MainAction.Navigate(BookScreenDestination))
                 }
             }
             is MainIntent.Refresh -> {
@@ -51,14 +47,13 @@ class MainViewModel : ViewModel() {
             is MainIntent.Logout -> {
                 viewModelScope.launch {
                     logoutUseCase.invoke()
-                    _actionFlow.emit(MainAction.Open(AuthScreenDestination, true))
+                    _actionFlow.emit(MainAction.Navigate(AuthScreenDestination, true))
                 }
             }
         }
     }
 
     private fun refresh() {
-        println("!!!!!!!! refresh")
         viewModelScope.launch {
             _uiState.update { MainState.Loading }
             _uiState.update {

@@ -10,13 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.myitschool.work.data.repo.AuthRepository
-import ru.myitschool.work.domain.auth.CheckAndSaveAuthCodeUseCase
-import ru.myitschool.work.domain.auth.CheckCodeFormatUseCase
+import ru.myitschool.work.domain.auth.LoginUseCase
 import ru.myitschool.work.ui.nav.MainScreenDestination
 
 class AuthViewModel : ViewModel() {
-    private val checkCodeFormatUseCase by lazy { CheckCodeFormatUseCase() }
-    private val checkAndSaveAuthCodeUseCase by lazy { CheckAndSaveAuthCodeUseCase(AuthRepository) }
+    private val loginUseCase by lazy { LoginUseCase(AuthRepository) }
     private val _uiState = MutableStateFlow<AuthState>(
         AuthState.Data(
             isEnabledSend = false,
@@ -30,11 +28,11 @@ class AuthViewModel : ViewModel() {
 
     fun onIntent(intent: AuthIntent) {
         when (intent) {
-            is AuthIntent.Send -> {
+            is AuthIntent.SendLogin -> {
                 viewModelScope.launch {
-                    checkAndSaveAuthCodeUseCase.invoke(intent.text).fold(
+                    loginUseCase.invoke(intent.login, intent.password).fold(
                         onSuccess = {
-                            _actionFlow.emit(AuthAction.Open(MainScreenDestination))
+                            _actionFlow.emit(AuthAction.Navigate(MainScreenDestination))
                         },
                         onFailure = { error ->
                             updateStateIfData { oldState ->
@@ -46,10 +44,20 @@ class AuthViewModel : ViewModel() {
                     )
                 }
             }
-            is AuthIntent.TextInput -> {
+
+            is AuthIntent.LoginInput -> {
                 updateStateIfData { oldState ->
                     oldState.copy(
-                        isEnabledSend = checkCodeFormatUseCase.invoke(intent.text),
+                        isEnabledSend = intent.text.isNotEmpty(),
+                        error = null
+                    )
+                }
+            }
+
+            is AuthIntent.PasswordInput -> {
+                updateStateIfData { oldState ->
+                    oldState.copy(
+                        isEnabledSend = intent.text.isNotEmpty(),
                         error = null
                     )
                 }
@@ -61,6 +69,5 @@ class AuthViewModel : ViewModel() {
         _uiState.update { state ->
             (state as? AuthState.Data)?.let { lambda.invoke(it) } ?: state
         }
-
     }
 }

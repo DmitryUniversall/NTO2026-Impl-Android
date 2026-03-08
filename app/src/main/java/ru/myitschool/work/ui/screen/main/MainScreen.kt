@@ -70,7 +70,7 @@ fun MainScreen(
     LaunchedEffect(Unit) {
         viewModel.actionFlow.collect { action ->
             when (action) {
-                is MainAction.Open -> {
+                is MainAction.Navigate -> {
                     navController.navigate(action.destination) {
                         if (action.clearBackStack) {
                             popUpTo(0)

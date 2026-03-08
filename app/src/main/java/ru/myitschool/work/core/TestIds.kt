@@ -4,8 +4,10 @@ object TestIds {
     object Auth {
         const val ERROR = "auth_error"
         const val SIGN_BUTTON = "auth_sign_button"
-        const val CODE_INPUT = "auth_code_input"
+        const val LOGIN_INPUT = "auth_login_input"
+        const val PASSWORD_INPUT = "auth_password_input"
     }
+
     object Main {
         const val ERROR = "main_error"
         const val ADD_BUTTON = "main_add_button"
