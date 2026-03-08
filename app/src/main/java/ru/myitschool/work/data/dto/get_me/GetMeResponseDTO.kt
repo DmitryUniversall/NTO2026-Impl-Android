@@ -7,5 +7,5 @@ import ru.myitschool.work.data.dto.UserDTO
 @Serializable
 data class GetMeResponseDTO(
     @SerialName("user")
-    val user: UserDTO? = null
+    val user: UserDTO?
 )

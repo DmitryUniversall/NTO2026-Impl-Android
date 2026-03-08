@@ -25,12 +25,11 @@ object AuthRepository {
 
         val token = authInfo.basicToken
 
-        val user = NetworkDataSource.getMeUsingToken(token).getOrThrow().user?.toEntity()
-            ?: error("No user field found in getMe response")
+        val dto = NetworkDataSource.getMeUsingToken(token).getOrThrow()
 
         val state = AuthState.Authenticated(
             basicToken = token,
-            user = user
+            user = dto.user?.toEntity() ?: error("No user field found in getMe response")
         )
 
         _authStateFlow.emit(state)

@@ -14,14 +14,12 @@ import ru.myitschool.work.data.repo.AuthRepository
 import ru.myitschool.work.data.repo.BookRepository
 import ru.myitschool.work.domain.auth.LogoutUseCase
 import ru.myitschool.work.domain.main.GetMainDataUseCase
-import ru.myitschool.work.ui.nav.AuthScreenDestination
 import ru.myitschool.work.ui.nav.BookScreenDestination
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.getValue
 
 class MainViewModel : ViewModel() {
-    private val getMainDataUseCase by lazy {GetMainDataUseCase(AuthRepository, BookRepository) }
+    private val getMainDataUseCase by lazy { GetMainDataUseCase(AuthRepository, BookRepository) }
     private val logoutUseCase by lazy { LogoutUseCase(AuthRepository) }
 
     private val _uiState = MutableStateFlow<MainState>(MainState.Loading)
@@ -41,13 +39,15 @@ class MainViewModel : ViewModel() {
                     _actionFlow.emit(MainAction.Navigate(BookScreenDestination))
                 }
             }
+
             is MainIntent.Refresh -> {
                 refresh()
             }
+
             is MainIntent.Logout -> {
                 viewModelScope.launch {
                     logoutUseCase.invoke()
-                    _actionFlow.emit(MainAction.Navigate(AuthScreenDestination, true))
+                    // _actionFlow.emit(MainAction.Navigate(AuthScreenDestination, true))  // Will perform automatically in nav-graph
                 }
             }
         }

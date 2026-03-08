@@ -13,10 +13,8 @@ import ru.myitschool.work.data.dto.book.BookRequestDTO
 import ru.myitschool.work.data.dto.get_me.GetMeResponseDTO
 import ru.myitschool.work.data.dto.login.LoginRequestDTO
 import ru.myitschool.work.data.dto.login.LoginResponseDTO
-import ru.myitschool.work.domain.auth.exceptions.UnauthenticatedException
-import ru.myitschool.work.domain.common.exceptions.ApiRequestFailedException
-import ru.myitschool.work.utils.network.AuthTokenAttributeKey
 import ru.myitschool.work.utils.network.AppHttpProvider
+import ru.myitschool.work.utils.network.AuthTokenAttributeKey
 import ru.myitschool.work.utils.network.SkipAuthAttributeKey
 import ru.myitschool.work.utils.network.getOrError
 
@@ -31,11 +29,7 @@ object NetworkDataSource {
                 attributes.put(AuthTokenAttributeKey, token)
             }
 
-            when (response.status) {
-                HttpStatusCode.OK -> response.getOrError<GetMeResponseDTO>()
-                HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden -> throw UnauthenticatedException("Failed to get user data")
-                else -> throw ApiRequestFailedException("Failed to get user data", response)
-            }
+            response.getOrError<GetMeResponseDTO>()
         }
     }
 

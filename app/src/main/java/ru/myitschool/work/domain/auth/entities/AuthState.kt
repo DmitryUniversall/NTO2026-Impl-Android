@@ -5,7 +5,6 @@ sealed class AuthState {
     object Unauthenticated : AuthState()
     data class Authenticated(
         val basicToken: String,
-        val user: User,
-//        val accessInfo: AccessInfo
+        val user: User
     ) : AuthState()
 }

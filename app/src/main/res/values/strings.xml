@@ -15,4 +15,6 @@
     <string name="book_empty">Всё забронировано</string>
     <string name="init_welcome">Добро пожаловать</string>
     <string name="success">Успешно</string>
+    <string name="auth_required_dialog_title">Требуется вход</string>
+    <string name="auth_required_dialog_message">Пожалуйста, войдите снова</string>
 </resources>
