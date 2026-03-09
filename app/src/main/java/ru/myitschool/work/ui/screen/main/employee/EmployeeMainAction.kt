@@ -1,10 +1,10 @@
-package ru.myitschool.work.ui.screen.main
+package ru.myitschool.work.ui.screen.main.employee
 
 import ru.myitschool.work.ui.nav.AppDestination
 
-sealed interface MainAction {
+sealed interface EmployeeMainAction {
     class Navigate(
         val destination: AppDestination,
         val clearBackStack: Boolean = false
-    ): MainAction
+    ): EmployeeMainAction
 }

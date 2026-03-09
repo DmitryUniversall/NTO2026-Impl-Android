@@ -69,18 +69,17 @@ fun InitScreen(
 }
 
 @Composable
-fun IdleView() {
-}
+private fun IdleView() {}
 
 @Composable
-fun LoadingView() {
+private fun LoadingView() {
     CircularProgressIndicator(
         modifier = Modifier.size(64.dp)
     )
 }
 
 @Composable
-fun SuccessView() {
+private fun SuccessView() {
     Text(
         text = stringResource(R.string.success),
         style = MaterialTheme.typography.titleMedium,
@@ -89,7 +88,7 @@ fun SuccessView() {
 }
 
 @Composable
-fun ErrorView(
+private fun ErrorView(
     viewModel: InitScreenViewModel,
     state: InitState.Error
 ) {

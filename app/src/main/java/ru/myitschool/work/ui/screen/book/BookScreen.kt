@@ -54,7 +54,7 @@ import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
-import ru.myitschool.work.ui.screen.main.MainResult
+import ru.myitschool.work.ui.screen.main.employee.EmployeeMainResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -72,7 +72,7 @@ fun BookScreen(
                 is BookAction.BackWithSuccess -> {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
-                        ?.set(MainResult.REFRESH_KEY, true)
+                        ?.set(EmployeeMainResult.REFRESH_KEY, true)
                     navController.popBackStack()
                 }
             }

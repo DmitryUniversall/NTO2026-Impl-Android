@@ -1,17 +1,17 @@
-package ru.myitschool.work.ui.screen.main
+package ru.myitschool.work.ui.screen.main.employee
 
 import kotlinx.collections.immutable.PersistentList
 
-sealed interface MainState {
-    data object Loading: MainState
+sealed interface EmployeeMainState {
+    data object Loading: EmployeeMainState
     data class Error(
         val error: String
-    ): MainState
+    ): EmployeeMainState
     data class Data(
         val name: String,
         val photoUrl: String,
         val books: PersistentList<Book>
-    ): MainState {
+    ): EmployeeMainState {
         data class Book(
             val date: String,
             val place: String,

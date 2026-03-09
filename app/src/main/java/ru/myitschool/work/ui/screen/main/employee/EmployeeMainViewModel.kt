@@ -1,4 +1,4 @@
-package ru.myitschool.work.ui.screen.main
+package ru.myitschool.work.ui.screen.main.employee
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,33 +18,33 @@ import ru.myitschool.work.ui.nav.BookScreenDestination
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class MainViewModel : ViewModel() {
+class EmployeeMainViewModel : ViewModel() {
     private val getMainDataUseCase by lazy { GetMainDataUseCase(AuthRepository, BookRepository) }
     private val logoutUseCase by lazy { LogoutUseCase(AuthRepository) }
 
-    private val _uiState = MutableStateFlow<MainState>(MainState.Loading)
-    val uiState: StateFlow<MainState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<EmployeeMainState>(EmployeeMainState.Loading)
+    val uiState: StateFlow<EmployeeMainState> = _uiState.asStateFlow()
 
-    private val _actionFlow: MutableSharedFlow<MainAction> = MutableSharedFlow()
-    val actionFlow: SharedFlow<MainAction> = _actionFlow
+    private val _actionFlow: MutableSharedFlow<EmployeeMainAction> = MutableSharedFlow()
+    val actionFlow: SharedFlow<EmployeeMainAction> = _actionFlow
 
     init {
         refresh()
     }
 
-    fun onIntent(intent: MainIntent) {
+    fun onIntent(intent: EmployeeMainIntent) {
         when (intent) {
-            is MainIntent.Add -> {
+            is EmployeeMainIntent.Add -> {
                 viewModelScope.launch {
-                    _actionFlow.emit(MainAction.Navigate(BookScreenDestination))
+                    _actionFlow.emit(EmployeeMainAction.Navigate(BookScreenDestination))
                 }
             }
 
-            is MainIntent.Refresh -> {
+            is EmployeeMainIntent.Refresh -> {
                 refresh()
             }
 
-            is MainIntent.Logout -> {
+            is EmployeeMainIntent.Logout -> {
                 viewModelScope.launch {
                     logoutUseCase.invoke()
                     // _actionFlow.emit(MainAction.Navigate(AuthScreenDestination, true))  // Will perform automatically in nav-graph
@@ -55,15 +55,15 @@ class MainViewModel : ViewModel() {
 
     private fun refresh() {
         viewModelScope.launch {
-            _uiState.update { MainState.Loading }
+            _uiState.update { EmployeeMainState.Loading }
             _uiState.update {
                 getMainDataUseCase.invoke().fold(
                     onSuccess = { data ->
-                        MainState.Data(
+                        EmployeeMainState.Data(
                             name = data.name,
                             photoUrl = data.photoUrl,
                             books = data.book.map { book ->
-                                MainState.Data.Book(
+                                EmployeeMainState.Data.Book(
                                     date = LocalDate
                                         .parse(book.date)
                                         .format(
@@ -75,7 +75,7 @@ class MainViewModel : ViewModel() {
                         )
                     },
                     onFailure = { error ->
-                        MainState.Error(
+                        EmployeeMainState.Error(
                             error = error.message?.takeIf { it.isNotBlank() } ?: "Unknown error"
                         )
                     }
