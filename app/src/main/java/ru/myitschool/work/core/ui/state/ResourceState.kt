@@ -30,6 +30,9 @@ fun <T> ResourceState<T>.dataOrNull(): T? = when (this) {
     ResourceState.Idle -> null
 }
 
+fun <T> ResourceState<T>.toIdle(): ResourceState.Idle =  // TODO: Should Idle store cached?
+    ResourceState.Idle
+
 fun <T> ResourceState<T>.toRefreshing(): ResourceState.Refreshing<T> =
     ResourceState.Refreshing(cached = this.dataOrNull())
 
@@ -101,4 +104,11 @@ inline fun <T> ResourceState<T>.whenState(
     if (matchesState && matchesData) {
         block(this)
     }
+}
+
+inline fun <T> ResourceState<T>.whenState(
+    condition: ResourceState<T>.() -> Boolean,
+    block: (ResourceState<T>) -> Unit
+) {
+    if (condition()) block(this)
 }

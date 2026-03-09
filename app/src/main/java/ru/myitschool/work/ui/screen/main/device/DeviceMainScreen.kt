@@ -26,24 +26,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
 import ru.myitschool.work.core.ui.state.isFetching
+import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.ui.common.muted
 import ru.myitschool.work.ui.screen.main.device.ui.ScheduleSelection
 import ru.myitschool.work.ui.screen.main.device.ui.TopRowSelection
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 @Composable
 fun DeviceMainScreen(
-    navController: NavController,
     viewModel: DeviceMainViewModel = viewModel()
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
     val uiState by viewModel.uiState.collectAsState()
+    val dateFormatter = remember {
+        DateTimeFormatter.ofPattern(
+            "EEEE, d MMMM yyyy 'г.'",
+            Locale.forLanguageTag("ru")
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -61,13 +68,13 @@ fun DeviceMainScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "15:00",
+                    text = uiState.currentDateTime.toLocalTime().toHHMM(),
                     style = typography.displayMedium,
                     color = colors.onBackground
                 )
 
                 Text(
-                    text = "Пятница, 3 марта 2026 г.",
+                    text = dateFormatter.format(uiState.currentDateTime),
                     style = typography.headlineSmall,
                     color = colors.onBackground.muted()
                 )
@@ -77,18 +84,19 @@ fun DeviceMainScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                if (uiState.schedule.isFetching) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp)
-                    )
-                } else {
-                    IconButton(
-                        modifier = Modifier.testTag(TestIds.Main.LOGOUT_BUTTON),
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = {
-                            viewModel.onIntent(DeviceMainIntent.Refresh)
-                        },
-                    ) {
+                IconButton(
+                    modifier = Modifier.testTag(TestIds.Main.LOGOUT_BUTTON),
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = {
+                        viewModel.onIntent(DeviceMainIntent.Refresh)
+                    },
+                    enabled = !uiState.schedule.isFetching
+                ) {
+                    if (uiState.schedule.isFetching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp)
+                        )
+                    } else {
                         Icon(
                             painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = stringResource(R.string.main_logout)
@@ -123,7 +131,7 @@ fun DeviceMainScreen(
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                TopRowSelection(viewModel = viewModel, selectedDate = uiState.selectedDate, schedule = uiState.schedule, bookRequestState = uiState.bookRequest)
+                TopRowSelection(viewModel = viewModel, selectedDate = uiState.selectedDate, schedule = uiState.schedule, bookRequestState = uiState.bookRequest, cancelBookingRequestState = uiState.cancelBookingRequest, me = uiState.me)
                 ScheduleSelection(viewModel = viewModel, selectedDate = uiState.selectedDate, schedule = uiState.schedule)
             }
         }

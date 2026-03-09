@@ -39,10 +39,10 @@ object NetworkDataSource {
         }
     }
 
-    suspend fun book(data: BookRequestDTO): Result<Boolean> = withContext(Dispatchers.IO) {
+    suspend fun book(data: BookRequestDTO?): Result<Boolean> = withContext(Dispatchers.IO) {
         return@withContext runCatching {
             val response = client.post(getUrl(Constants.BOOK_URL)) {
-                setBody(data)
+                setBody(data ?: mapOf<String, String>())
             }
 
             when (response.status) {

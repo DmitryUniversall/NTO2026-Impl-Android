@@ -27,4 +27,5 @@
     <string name="init_logout">Выйти из аккаунта</string>
     <string name="init_refresh">Обновить</string>
     <string name="error">Ошибка</string>
+    <string name="cancel_booking">Отменить бронь</string>
 </resources>

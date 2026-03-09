@@ -26,11 +26,6 @@ object BookRepository {
         }
     }
 
-    suspend fun book(data: BookRequestData): Result<Boolean> {
-        val dto = BookRequestDTO(data.date, data.placeId)
-        return NetworkDataSource.book(dto)
-    }
-
     suspend fun getRoomSchedule(): Result<Map<LocalDate, RoomDaySchedule>> {
         return NetworkDataSource.getRoomSchedule().map { dto ->
             val result = mutableMapOf<LocalDate, RoomDaySchedule>()
@@ -44,5 +39,13 @@ object BookRepository {
 
             result
         }
+    }
+
+    suspend fun book(data: BookRequestData?): Result<Boolean> {
+        return NetworkDataSource.book(data?.let { BookRequestDTO(it.date, it.placeId) })
+    }
+
+    suspend fun cancelBooking(): Result<Boolean> {
+        return NetworkDataSource.cancelCurrentRoomBooking()
     }
 }

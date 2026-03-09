@@ -1,7 +1,6 @@
 package ru.myitschool.work.ui.screen.main.device.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import ru.myitschool.work.core.ui.state.whenData
 import ru.myitschool.work.core.ui.state.whenError
 import ru.myitschool.work.core.ui.state.whenLoading
 import ru.myitschool.work.core.ui.state.whenState
+import ru.myitschool.work.domain.auth.entities.User
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
 import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 import ru.myitschool.work.ui.common.shimmer
@@ -46,7 +46,9 @@ fun TopRowSelection(
     viewModel: DeviceMainViewModel,
     selectedDate: LocalDate,
     schedule: ResourceState<Map<LocalDate, RoomDaySchedule>>,
-    bookRequestState: ResourceState<Unit>
+    bookRequestState: ResourceState<Unit>,
+    cancelBookingRequestState: ResourceState<Unit>,
+    me: ResourceState<User>
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
@@ -99,7 +101,6 @@ fun TopRowSelection(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val daySchedule = data[selectedDate]!!  // TODO: Unsafe
-                val bookAllowed = selectedDate == LocalDate.now() && !daySchedule.isBooked && !bookRequestState.isLoading
 
                 Row(
                     modifier = Modifier
@@ -123,30 +124,88 @@ fun TopRowSelection(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    PrimaryGenericButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth(1f)
-                            .alpha(if (bookAllowed) 1f else 0.7f),
-                        enabled = bookAllowed,
-                        onClick = {
-                            viewModel.onIntent(DeviceMainIntent.BookForToday)
-                        },
-                        text = stringResource(R.string.book_for_today),
-                        trailing = {
-                            bookRequestState.whenLoading { CircularProgressIndicator(modifier = Modifier.size(16.dp)) }
+                    me.whenError { errorMessage, _, _ ->
+                        Text(
+                            text = errorMessage,
+                            style = typography.bodyLarge,
+                            color = colors.error
+                        )
+                    }
 
-                            bookRequestState.whenError { errorMessage, _, _ ->
-                                Text(
-                                    modifier = Modifier
-                                        .weight(0.5f),
-                                    text = "(${stringResource(R.string.error)}: $errorMessage)",
-                                    style = typography.bodySmall,
-                                    color = colors.error
+                    me.whenState(
+                        ResourceState.Loading::class,
+                        ResourceState.Refreshing::class,
+                        containsData = false
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth()
+                                .shimmer(
+                                    shape = RoundedCornerShape(8.dp),
+                                    baseColor = colors.onSurface.copy(alpha = 0.08f),
+                                    highlightColor = colors.onSurface.copy(alpha = 0.2f)
                                 )
-                            }
+                        )
+                    }
+
+                    me.whenData { user ->
+                        if (daySchedule.isBooked && daySchedule.bookedBy == user.name) {
+                            val cancelAllowed = selectedDate == LocalDate.now() && !cancelBookingRequestState.isLoading
+
+                            PrimaryGenericButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth(1f)
+                                    .alpha(if (cancelAllowed) 1f else 0.7f),
+                                enabled = cancelAllowed,
+                                onClick = {
+                                    viewModel.onIntent(DeviceMainIntent.CancelBooking)
+                                },
+                                text = stringResource(R.string.cancel_booking),
+                                trailing = {
+                                    cancelBookingRequestState.whenLoading { CircularProgressIndicator(modifier = Modifier.size(16.dp)) }
+
+                                    cancelBookingRequestState.whenError { errorMessage, _, _ ->
+                                        Text(
+                                            modifier = Modifier
+                                                .weight(0.5f),
+                                            text = "(${stringResource(R.string.error)}: $errorMessage)",
+                                            style = typography.bodySmall,
+                                            color = colors.error
+                                        )
+                                    }
+                                }
+                            )
+                        } else {
+                            val bookAllowed = selectedDate == LocalDate.now() && !bookRequestState.isLoading && !daySchedule.isBooked
+
+                            PrimaryGenericButton(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth(1f)
+                                    .alpha(if (bookAllowed) 1f else 0.7f),
+                                enabled = bookAllowed,
+                                onClick = {
+                                    viewModel.onIntent(DeviceMainIntent.BookForToday)
+                                },
+                                text = stringResource(R.string.book_for_today),
+                                trailing = {
+                                    bookRequestState.whenLoading { CircularProgressIndicator(modifier = Modifier.size(16.dp)) }
+
+                                    bookRequestState.whenError { errorMessage, _, _ ->
+                                        Text(
+                                            modifier = Modifier
+                                                .weight(0.5f),
+                                            text = "(${stringResource(R.string.error)}: $errorMessage)",
+                                            style = typography.bodySmall,
+                                            color = colors.error
+                                        )
+                                    }
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
         }

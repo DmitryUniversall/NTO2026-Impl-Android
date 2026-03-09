@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,9 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -123,12 +126,32 @@ private fun Content(
         modifier = Modifier
             .testTag(TestIds.Auth.PASSWORD_INPUT)
             .fillMaxWidth(),
+
         value = passwordInput,
+
         onValueChange = {
             passwordInput = it
-            viewModel.onIntent(AuthIntent.PasswordInput(passwordInput))
+            viewModel.onIntent(AuthIntent.PasswordInput(it))
         },
+
         label = { Text(stringResource(R.string.auth_password_label)) },
+
+        visualTransformation = PasswordVisualTransformation(),
+
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
+            autoCorrectEnabled = false
+        ),
+
+        keyboardActions = KeyboardActions(
+            onDone = {
+                viewModel.onIntent(AuthIntent.SendLogin(loginInput, passwordInput))
+            }
+        ),
+
+        singleLine = true,
+
         colors = TextFieldDefaults.colors(
             focusedTextColor = colors.onSurface,
             unfocusedTextColor = colors.onSurface,

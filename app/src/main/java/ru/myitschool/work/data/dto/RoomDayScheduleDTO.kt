@@ -11,8 +11,8 @@ data class RoomDayScheduleDTO(
     @SerialName("userName")
     val userName: String? = null,
 
-    @SerialName("bookedAt")
-    val bookedAt: String? = null
+//    @SerialName("bookedAt")
+//    val bookedAt: String? = null
 ) {
     fun toEntity(): RoomDaySchedule = RoomDaySchedule(
         isBooked = true,

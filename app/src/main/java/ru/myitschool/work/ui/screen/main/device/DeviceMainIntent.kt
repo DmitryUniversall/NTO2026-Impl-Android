@@ -6,5 +6,6 @@ sealed interface DeviceMainIntent {
     object Logout : DeviceMainIntent
     object Refresh : DeviceMainIntent
     object BookForToday : DeviceMainIntent
+    object CancelBooking : DeviceMainIntent
     data class SelectDate(val date: LocalDate) : DeviceMainIntent
 }

@@ -32,7 +32,7 @@ fun MainScreen(
     when (val currentState = uiState) {
         is MainScreenState.Loading -> LoadingView()
         is MainScreenState.Error -> ErrorView(viewModel, currentState)
-        is MainScreenState.Device -> DeviceMainScreen(navController = navController)
+        is MainScreenState.Device -> DeviceMainScreen()
         is MainScreenState.Employee -> EmployeeMainScreen(navController = navController)
     }
 }
