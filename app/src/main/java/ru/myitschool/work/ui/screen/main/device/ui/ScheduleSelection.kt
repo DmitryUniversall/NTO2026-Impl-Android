@@ -1,5 +1,6 @@
 package ru.myitschool.work.ui.screen.main.device.ui
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import ru.myitschool.work.core.ui.state.ResourceState
+import ru.myitschool.work.core.ui.state.whenData
+import ru.myitschool.work.core.ui.state.whenError
+import ru.myitschool.work.core.ui.state.whenState
 import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
 import ru.myitschool.work.ui.common.muted
@@ -53,7 +57,6 @@ private fun BookingLogItem(
 
     Row(
         modifier = modifier
-            .padding(8.dp)
             .height(IntrinsicSize.Min)
             .withShapeBackground(
                 color = colors.surfaceVariant.muted(alpha = 0.1f),
@@ -95,15 +98,72 @@ private fun BookingLogItem(
 }
 
 @Composable
-fun ScheduleSelection(
-    viewModel: DeviceMainViewModel,
-    selectedDate: LocalDate,
-    daySchedule: ResourceState<RoomDaySchedule>,
+private fun DayLogBlock(
+    date: LocalDate,
+    schedule: ResourceState<Map<LocalDate, RoomDaySchedule>>
 ) {
     val colors = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
 
     val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(scrollState)
+            .fillMaxHeight()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        schedule.whenError { errorMessage, _, _ ->
+            Text(
+                text = errorMessage,
+                style = typography.bodyLarge,
+                color = colors.error
+            )
+        }
+
+        schedule.whenState(
+            ResourceState.Loading::class,
+            ResourceState.Refreshing::class,
+            containsData = false
+        ) {
+            repeat(5) {
+                Box(
+                    modifier = Modifier
+                        .height(32.dp)
+                        .fillMaxWidth()
+                        .shimmer(
+                            shape = RoundedCornerShape(8.dp),
+                            baseColor = colors.onSurface.copy(alpha = 0.08f),
+                            highlightColor = colors.onSurface.copy(alpha = 0.2f)
+                        ),
+                )
+            }
+        }
+
+        schedule.whenData { data ->
+            val daySchedule = data[date]!!  // TODO: Unsafe
+            Log.d("Test", "booked by: ${daySchedule.bookedBy}")
+            if (daySchedule.isBooked) {
+                BookingLogItem(
+                    info = BookingLogInfo.Book(
+                        bookedAt = daySchedule.bookedAt!!,
+                        bookedBy = daySchedule.bookedBy!!
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ScheduleSelection(
+    viewModel: DeviceMainViewModel,
+    selectedDate: LocalDate,
+    schedule: ResourceState<Map<LocalDate, RoomDaySchedule>>,
+) {
+    val colors = MaterialTheme.colorScheme
 
     val pagerState = rememberPagerState(
         pageCount = { 3 }
@@ -137,52 +197,15 @@ fun ScheduleSelection(
         ScheduleNav(viewModel = viewModel, selectedDate = selectedDate)
 
         HorizontalPager(
-            state = pagerState
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(scrollState)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                when (daySchedule) {
-                    is ResourceState.Idle -> {}
-
-                    is ResourceState.Success<RoomDaySchedule> -> {
-                        val schedule = daySchedule.data
-
-                        if (schedule.isBooked) {
-                            BookingLogItem(
-                                info = BookingLogInfo.Book(
-                                    bookedAt = LocalDateTime.now(),
-                                    bookedBy = schedule.bookedBy!!
-                                )
-                            )
-                        }
-                    }
-
-                    is ResourceState.Error -> {
-                        Text(
-                            text = daySchedule.errorMessage,
-                            style = typography.bodyLarge,
-                            color = colors.error
-                        )
-                    }
-
-                    is ResourceState.Loading, is ResourceState.Refreshing -> {
-                        Box(
-                            modifier = Modifier
-                                .height(32.dp)
-                                .fillMaxWidth()
-                                .shimmer(
-                                    shape = RoundedCornerShape(8.dp),
-                                    baseColor = colors.onSurface.copy(alpha = 0.008f),
-                                    highlightColor = colors.onSurface.copy(alpha = 0.02f)
-                                ),
-                        )
-                    }
-                }
-            }
+            modifier = Modifier
+                .fillMaxHeight(),
+            state = pagerState,
+            verticalAlignment = Alignment.Top
+        ) { page ->
+            DayLogBlock(
+                date = viewModel.pageToDate(page.toLong()),
+                schedule = schedule
+            )
         }
     }
 }

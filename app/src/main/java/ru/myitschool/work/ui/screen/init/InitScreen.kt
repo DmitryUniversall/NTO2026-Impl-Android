@@ -3,7 +3,6 @@ package ru.myitschool.work.ui.screen.init
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -99,16 +98,12 @@ private fun ErrorView(
         color = MaterialTheme.colorScheme.onBackground
     )
 
-    Spacer(modifier = Modifier.size(16.dp))
-
     PrimaryGenericButton(
         text = stringResource(R.string.init_refresh),
         onClick = {
             viewModel.onIntent(InitIntent.Refresh)
         }
     )
-
-    Spacer(modifier = Modifier.size(16.dp))
 
     PrimaryGenericButton(
         text = stringResource(R.string.init_logout),

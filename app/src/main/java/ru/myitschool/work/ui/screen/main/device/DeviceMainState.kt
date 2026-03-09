@@ -6,13 +6,13 @@ import java.time.LocalDate
 
 data class DeviceMainState(
     val selectedDate: LocalDate,
-    val selectedDaySchedule: ResourceState<RoomDaySchedule>,
+    val schedule: ResourceState<Map<LocalDate, RoomDaySchedule>>,
     val bookRequest: ResourceState<Unit>
 ) {
     companion object {
         fun empty(): DeviceMainState = DeviceMainState(
             selectedDate = LocalDate.now(),
-            selectedDaySchedule = ResourceState.Idle,
+            schedule = ResourceState.Idle,
             bookRequest = ResourceState.Idle
         )
     }
