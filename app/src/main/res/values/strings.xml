@@ -17,4 +17,11 @@
     <string name="success">Успешно</string>
     <string name="auth_required_dialog_title">Требуется вход</string>
     <string name="auth_required_dialog_message">Пожалуйста, войдите снова</string>
+    <string name="book">Забронировать</string>
+    <string name="today">Сегодня</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="dayAfterTomorrow">Послезавтра</string>
+    <string name="room_free">Свободно</string>
+    <string name="room_booked">Занято</string>
+    <string name="book_for_today">Забронировать на сегодня</string>
 </resources>

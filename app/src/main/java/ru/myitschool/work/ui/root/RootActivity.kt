@@ -16,7 +16,9 @@ class RootActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WorkTheme {
+            WorkTheme(
+                dynamicColor = false
+            ) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavHost(
                         modifier = Modifier

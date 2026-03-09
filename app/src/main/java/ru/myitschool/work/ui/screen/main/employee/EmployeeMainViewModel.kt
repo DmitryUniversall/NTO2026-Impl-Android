@@ -47,7 +47,6 @@ class EmployeeMainViewModel : ViewModel() {
             is EmployeeMainIntent.Logout -> {
                 viewModelScope.launch {
                     logoutUseCase.invoke()
-                    // _actionFlow.emit(MainAction.Navigate(AuthScreenDestination, true))  // Will perform automatically in nav-graph
                 }
             }
         }
