@@ -24,4 +24,6 @@
     <string name="room_free">Свободно</string>
     <string name="room_booked">Занято</string>
     <string name="book_for_today">Забронировать на сегодня</string>
+    <string name="init_logout">Выйти из аккаунта</string>
+    <string name="init_refresh">Обновить</string>
 </resources>

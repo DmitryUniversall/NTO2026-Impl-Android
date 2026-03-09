@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.myitschool.work.data.repo.AuthRepository
-import ru.myitschool.work.data.repo.BookRepository
 import ru.myitschool.work.domain.auth.LogoutUseCase
 import ru.myitschool.work.domain.main.GetMainDataUseCase
 import ru.myitschool.work.ui.nav.BookScreenDestination
@@ -19,7 +18,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class EmployeeMainViewModel : ViewModel() {
-    private val getMainDataUseCase by lazy { GetMainDataUseCase(AuthRepository, BookRepository) }
+    private val getMainDataUseCase by lazy { GetMainDataUseCase(AuthRepository) }
     private val logoutUseCase by lazy { LogoutUseCase(AuthRepository) }
 
     private val _uiState = MutableStateFlow<EmployeeMainState>(EmployeeMainState.Loading)
@@ -41,7 +40,7 @@ class EmployeeMainViewModel : ViewModel() {
             }
 
             is EmployeeMainIntent.Refresh -> {
-                refresh()
+                refresh(fetch = true)
             }
 
             is EmployeeMainIntent.Logout -> {
@@ -52,11 +51,11 @@ class EmployeeMainViewModel : ViewModel() {
         }
     }
 
-    private fun refresh() {
+    private fun refresh(fetch: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { EmployeeMainState.Loading }
             _uiState.update {
-                getMainDataUseCase.invoke().fold(
+                getMainDataUseCase.invoke(fetch = fetch).fold(
                     onSuccess = { data ->
                         EmployeeMainState.Data(
                             name = data.name,

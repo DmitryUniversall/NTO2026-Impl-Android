@@ -29,8 +29,8 @@ class MainScreenViewModel : ViewModel() {
 
         _uiState.value = when (val authState = getAuthFlowUseCase().first()) {
             is AuthState.Authenticated -> when (authState.user.userRole) {
-                UserRole.EMPLOYEE -> MainScreenState.Employee
-                UserRole.DEVICE -> MainScreenState.Device
+                UserRole.USER -> MainScreenState.Employee
+                UserRole.MEETING_ROOM -> MainScreenState.Device
             }
 
             is AuthState.Unauthenticated -> MainScreenState.Error("Unauthenticated")

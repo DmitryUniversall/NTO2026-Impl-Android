@@ -1,5 +1,6 @@
 package ru.myitschool.work.data.source
 
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -9,13 +10,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.myitschool.work.core.Constants
 import ru.myitschool.work.data.dto.PlaceDTO
+import ru.myitschool.work.data.dto.RoomDayScheduleDTO
 import ru.myitschool.work.data.dto.book.BookRequestDTO
-import ru.myitschool.work.data.dto.get_me.GetMeResponseDTO
-import ru.myitschool.work.data.dto.login.LoginRequestDTO
 import ru.myitschool.work.data.dto.login.LoginResponseDTO
 import ru.myitschool.work.utils.network.AppHttpProvider
 import ru.myitschool.work.utils.network.AuthTokenAttributeKey
-import ru.myitschool.work.utils.network.SkipAuthAttributeKey
 import ru.myitschool.work.utils.network.getOrError
 
 object NetworkDataSource {
@@ -23,31 +22,20 @@ object NetworkDataSource {
 
     private fun getUrl(targetUrl: String) = "${Constants.HOST}/api/$targetUrl"
 
-    suspend fun getMeUsingToken(token: String): Result<GetMeResponseDTO> = withContext(Dispatchers.IO) {
+    suspend fun login(token: String): Result<LoginResponseDTO> = withContext(Dispatchers.IO) {
         return@withContext runCatching {
-            val response = client.get(getUrl(Constants.GET_ME_URL)) {
+            val response = client.get(getUrl(Constants.LOGIN_URL)) {
                 attributes.put(AuthTokenAttributeKey, token)
             }
 
-            response.getOrError<GetMeResponseDTO>()
+            response.getOrError()
         }
     }
 
-    suspend fun getMe(): Result<GetMeResponseDTO> = withContext(Dispatchers.IO) {
+    suspend fun reLogin(): Result<LoginResponseDTO> = withContext(Dispatchers.IO) {
         return@withContext runCatching {
-            val response = client.get(getUrl(Constants.GET_ME_URL))
-            response.getOrError<GetMeResponseDTO>()
-        }
-    }
-
-    suspend fun login(dto: LoginRequestDTO): Result<LoginResponseDTO> = withContext(Dispatchers.IO) {
-        return@withContext runCatching {
-            val response = client.post(getUrl(Constants.LOGIN_URL)) {
-                attributes.put(SkipAuthAttributeKey, true)
-                setBody(dto)
-            }
-
-            response.getOrError<LoginResponseDTO>()
+            val response = client.get(getUrl(Constants.LOGIN_URL))
+            response.getOrError()
         }
     }
 
@@ -65,17 +53,28 @@ object NetworkDataSource {
         }
     }
 
-    suspend fun getUserBookings(): Result<Map<String, PlaceDTO>?> = withContext(Dispatchers.IO) {
-        return@withContext runCatching {
-            val response = client.get(getUrl(Constants.GET_USER_BOOKINGS_URL))
-            response.getOrError<Map<String, PlaceDTO>?>()
-        }
-    }
-
     suspend fun getAvailablePlaces(): Result<Map<String, List<PlaceDTO>>?> = withContext(Dispatchers.IO) {
         return@withContext runCatching {
             val response = client.get(getUrl(Constants.GET_AVAILABLE_PLACES_URL))
-            response.getOrError<Map<String, List<PlaceDTO>>?>()
+            response.getOrError()
+        }
+    }
+
+    suspend fun getRoomSchedule(): Result<Map<String, RoomDayScheduleDTO>> = withContext(Dispatchers.IO) {
+        return@withContext runCatching {
+            val response = client.get(getUrl(Constants.GET_ROOM_SCHEDULE_URL))
+            response.getOrError()
+        }
+    }
+
+    suspend fun cancelCurrentRoomBooking(): Result<Boolean> = withContext(Dispatchers.IO) {
+        return@withContext runCatching {
+            val response = client.delete(getUrl(Constants.CANCEL_ROOM_BOOKING_URL))
+
+            when (response.status) {
+                HttpStatusCode.NoContent -> true
+                else -> error(response.bodyAsText())
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ val PrimaryContainerColor = White
 
 val OnBackgroundColor = Neutral900
 val OnSurfaceColor = Neutral900
-val OnSurfaceVariantColor = Neutral200
+val OnSurfaceVariantColor = Neutral500
 
 val SuccessColor = SuccessGreen
 val ErrorColor = ErrorRed

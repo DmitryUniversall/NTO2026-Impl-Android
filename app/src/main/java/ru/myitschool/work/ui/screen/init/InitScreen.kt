@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.myitschool.work.R
+import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 
 @Composable
 fun InitScreen(
@@ -69,7 +69,8 @@ fun InitScreen(
 }
 
 @Composable
-private fun IdleView() {}
+private fun IdleView() {
+}
 
 @Composable
 private fun LoadingView() {
@@ -100,11 +101,19 @@ private fun ErrorView(
 
     Spacer(modifier = Modifier.size(16.dp))
 
-    Button(
+    PrimaryGenericButton(
+        text = stringResource(R.string.init_refresh),
         onClick = {
             viewModel.onIntent(InitIntent.Refresh)
-        },
-    ) {
-        Text(stringResource(R.string.main_refresh))
-    }
+        }
+    )
+
+    Spacer(modifier = Modifier.size(16.dp))
+
+    PrimaryGenericButton(
+        text = stringResource(R.string.init_logout),
+        onClick = {
+            viewModel.onIntent(InitIntent.Logout)
+        }
+    )
 }

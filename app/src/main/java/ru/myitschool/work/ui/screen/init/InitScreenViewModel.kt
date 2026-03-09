@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.myitschool.work.data.repo.AuthRepository
+import ru.myitschool.work.domain.auth.LogoutUseCase
 import ru.myitschool.work.domain.auth.RestoreAuthStateUseCase
 import ru.myitschool.work.domain.auth.entities.AuthState
 import ru.myitschool.work.ui.nav.AuthScreenDestination
@@ -18,6 +19,7 @@ import ru.myitschool.work.ui.nav.MainScreenDestination
 
 class InitScreenViewModel : ViewModel() {
     private val restoreAuthStateUseCase by lazy { RestoreAuthStateUseCase(AuthRepository) }
+    private val logoutUseCase by lazy { LogoutUseCase(AuthRepository) }
 
     private val _uiState = MutableStateFlow<InitState>(InitState.Idle)
     val uiState = _uiState.asStateFlow()
@@ -74,9 +76,16 @@ class InitScreenViewModel : ViewModel() {
         }
     }
 
+    private fun launchLogout() {
+        viewModelScope.launch {
+            logoutUseCase()
+        }
+    }
+
     fun onIntent(intent: InitIntent) {
         when (intent) {
             is InitIntent.Refresh -> launchTryToRestoreAuthState()
+            is InitIntent.Logout -> launchLogout()
         }
     }
 }

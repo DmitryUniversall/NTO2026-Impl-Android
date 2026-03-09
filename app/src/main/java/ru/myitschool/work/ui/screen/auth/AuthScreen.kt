@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,12 +31,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
+import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 
 @Composable
 fun AuthScreen(
     viewModel: AuthViewModel = viewModel(),
     navController: NavController
 ) {
+    val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -57,8 +62,9 @@ fun AuthScreen(
     ) {
         Text(
             text = stringResource(R.string.auth_title),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center
+            style = typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            color = colors.onBackground
         )
 
         when (val currentState = state) {
@@ -77,6 +83,9 @@ private fun Content(
     viewModel: AuthViewModel,
     state: AuthState.Data
 ) {
+    val colors = MaterialTheme.colorScheme
+    val typography = MaterialTheme.typography
+
     var loginInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
@@ -91,7 +100,21 @@ private fun Content(
             loginInput = it
             viewModel.onIntent(AuthIntent.LoginInput(loginInput))
         },
-        label = { Text(stringResource(R.string.auth_login_label)) }
+        label = { Text(stringResource(R.string.auth_login_label)) },
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = colors.onSurface,
+            unfocusedTextColor = colors.onSurface,
+            cursorColor = colors.primary,
+
+            focusedIndicatorColor = colors.primary,
+            unfocusedIndicatorColor = colors.outline,
+
+            focusedLabelColor = colors.primary,
+            unfocusedLabelColor = colors.onSurfaceVariant,
+
+            focusedContainerColor = colors.surface,
+            unfocusedContainerColor = colors.surface
+        )
     )
 
     Spacer(modifier = Modifier.size(16.dp))
@@ -105,29 +128,42 @@ private fun Content(
             passwordInput = it
             viewModel.onIntent(AuthIntent.PasswordInput(passwordInput))
         },
-        label = { Text(stringResource(R.string.auth_password_label)) }
+        label = { Text(stringResource(R.string.auth_password_label)) },
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = colors.onSurface,
+            unfocusedTextColor = colors.onSurface,
+            cursorColor = colors.primary,
+
+            focusedIndicatorColor = colors.primary,
+            unfocusedIndicatorColor = colors.outline,
+
+            focusedLabelColor = colors.primary,
+            unfocusedLabelColor = colors.onSurfaceVariant,
+
+            focusedContainerColor = colors.surface,
+            unfocusedContainerColor = colors.surface
+        )
     )
 
     Spacer(modifier = Modifier.size(16.dp))
 
-    Button(
+    PrimaryGenericButton(
         modifier = Modifier
             .testTag(TestIds.Auth.SIGN_BUTTON)
             .fillMaxWidth(),
         onClick = {
             viewModel.onIntent(AuthIntent.SendLogin(loginInput, passwordInput))
         },
-        enabled = state.isEnabledSend
-    ) {
-        Text(stringResource(R.string.auth_sign_in))
-    }
+        enabled = state.isEnabledSend,
+        text = stringResource(R.string.auth_sign_in)
+    )
 
     if (state.error != null) {
         Text(
             modifier = Modifier.testTag(TestIds.Auth.ERROR),
             text = state.error,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Red,
+            style = typography.bodyMedium,
+            color = colors.error,
         )
     }
 }

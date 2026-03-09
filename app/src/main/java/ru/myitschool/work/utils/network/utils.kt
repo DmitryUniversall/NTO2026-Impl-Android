@@ -12,7 +12,7 @@ suspend inline fun <reified T> HttpResponse.getOrError(): T {
     if (this.status.isSuccess()) return body<T>()
 
     when (this.status) {
-        HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden -> throw UnauthenticatedException("Unauthenticated: ${bodyAsText()}")
+        HttpStatusCode.Unauthorized -> throw UnauthenticatedException("Unauthenticated: ${bodyAsText()}")
         else -> throw ApiRequestFailedException("Api request failed: ${bodyAsText()}", this)
     }
 }

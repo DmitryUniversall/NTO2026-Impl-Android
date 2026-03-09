@@ -3,8 +3,8 @@ package ru.myitschool.work.data.repo
 import android.util.Base64
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import ru.myitschool.work.data.dto.login.LoginRequestDTO
 import ru.myitschool.work.data.source.LocalDataSource
 import ru.myitschool.work.data.source.NetworkDataSource
 import ru.myitschool.work.domain.auth.entities.AuthState
@@ -25,11 +25,11 @@ object AuthRepository {
 
         val token = authInfo.basicToken
 
-        val dto = NetworkDataSource.getMeUsingToken(token).getOrThrow()
+        val dto = NetworkDataSource.login(token).getOrThrow()
 
         val state = AuthState.Authenticated(
             basicToken = token,
-            user = dto.user?.toEntity() ?: error("No user field found in getMe response")
+            user = dto.toUser()
         )
 
         _authStateFlow.emit(state)
@@ -37,11 +37,29 @@ object AuthRepository {
     }
 
     suspend fun login(login: String, password: String): Result<AuthState.Authenticated> {
-        val dto = LoginRequestDTO(login = login, password = password)
-        return NetworkDataSource.login(dto).mapCatching { dto ->
+        return NetworkDataSource.login(generateBasicAuthToken(login, password)).mapCatching { dto ->
             val state = AuthState.Authenticated(
                 basicToken = generateBasicAuthToken(login, password),
-                user = dto.user?.toEntity() ?: error("No user field found in login response")
+                user = dto.toUser()
+            )
+
+            _authStateFlow.emit(state)
+
+            LocalDataSource.saveAuthInfo(
+                LocalAuthInfo(
+                    basicToken = state.basicToken
+                )
+            )
+
+            state
+        }
+    }
+
+    suspend fun reLogin(): Result<AuthState.Authenticated> {
+        return NetworkDataSource.reLogin().mapCatching { dto ->
+            val state = AuthState.Authenticated(
+                basicToken = (_authStateFlow.first() as AuthState.Authenticated).basicToken,
+                user = dto.toUser()
             )
 
             _authStateFlow.emit(state)
