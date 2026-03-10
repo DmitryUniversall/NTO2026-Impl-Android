@@ -28,8 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import ru.myitschool.work.core.ui.state.ResourceState
-import ru.myitschool.work.core.ui.state.whenData
-import ru.myitschool.work.core.ui.state.whenState
+import ru.myitschool.work.core.ui.state.whenHasAnyData
+import ru.myitschool.work.core.ui.state.whenFetchingFirstTime
 import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
 import ru.myitschool.work.ui.common.muted
@@ -112,11 +112,7 @@ private fun DayLogBlock(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        schedule.whenState(
-            ResourceState.Loading::class,
-            ResourceState.Refreshing::class,
-            containsData = false
-        ) {
+        schedule.whenFetchingFirstTime {
             repeat(5) {
                 Box(
                     modifier = Modifier
@@ -131,7 +127,7 @@ private fun DayLogBlock(
             }
         }
 
-        schedule.whenData { data ->
+        schedule.whenHasAnyData { data ->
             val daySchedule = data[date]!!  // TODO: Unsafe
 
             if (daySchedule is RoomDaySchedule.Bookend) {

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
-import ru.myitschool.work.core.ui.state.whenError
+import ru.myitschool.work.core.ui.state.whenHasAnyError
 import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.ui.common.muted
 import ru.myitschool.work.ui.screen.main.device.ui.ScheduleSelection
@@ -137,9 +137,9 @@ fun DeviceMainScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                uiState.schedule.whenError { errorMessage, _, _ ->
+                uiState.schedule.whenHasAnyError { state ->
                     Text(
-                        text = errorMessage,
+                        text = state.errorMessage,
                         style = typography.bodyLarge,
                         color = colors.error
                     )

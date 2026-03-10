@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 import ru.myitschool.work.core.ui.state.ResourceState
 import ru.myitschool.work.core.ui.state.isFetching
 import ru.myitschool.work.core.ui.state.toError
-import ru.myitschool.work.core.ui.state.toIdle
 import ru.myitschool.work.core.ui.state.toLoading
 import ru.myitschool.work.core.ui.state.toRefreshing
 import ru.myitschool.work.data.repo.AuthRepository
@@ -60,7 +59,7 @@ class DeviceMainViewModel : ViewModel() {
         when (intent) {
             is DeviceMainIntent.Logout -> viewModelScope.launch { logoutUseCase.invoke() }
             is DeviceMainIntent.SelectDate -> _uiState.update { it.copy(selectedDate = intent.date) }
-            is DeviceMainIntent.Refresh -> viewModelScope.launch { updater(); _uiState.update { it.copy(bookRequest = it.bookRequest.toIdle()) } }
+            is DeviceMainIntent.Refresh -> viewModelScope.launch { updater(); _uiState.update { it.copy(bookRequest = ResourceState.Idle, cancelBookingRequest = ResourceState.Idle) } }
             is DeviceMainIntent.BookForToday -> viewModelScope.launch { bookForToday(); updater() }
             is DeviceMainIntent.CancelBooking -> viewModelScope.launch { cancelBooking(); updater() }
         }
