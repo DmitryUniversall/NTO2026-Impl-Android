@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Work</string>
-    <string name="title_activity_root">RootActivity</string>
-    <string name="auth_title">Привет! Введи данные для авторизации</string>
+    <string name="app_name">OfficeSpace</string>
+    <string name="title_activity_root">OfficeSpace</string>
+    <string name="auth_title">Привет! Введи данные для входа</string>
     <string name="auth_login_label">Логин</string>
     <string name="auth_password_label">Пароль</string>
     <string name="auth_sign_in">Войти</string>
