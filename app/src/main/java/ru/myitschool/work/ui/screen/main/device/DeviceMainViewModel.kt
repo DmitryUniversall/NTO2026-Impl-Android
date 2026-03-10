@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.myitschool.work.core.ui.state.ResourceState
@@ -44,7 +45,7 @@ class DeviceMainViewModel : ViewModel() {
             loadMe()
 
             withContext(Dispatchers.Default) {
-                while (true) {
+                while (isActive) {
                     updater()
                     delay(10000)
                 }
