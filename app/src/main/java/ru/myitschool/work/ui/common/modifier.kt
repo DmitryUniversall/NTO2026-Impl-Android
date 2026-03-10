@@ -48,17 +48,6 @@ fun Modifier.withShapeBackground(
         )
         .clip(shape = shape)
 
-fun Modifier.withShapeBackground(
-    gradient: Brush,
-    shape: Shape
-) =
-    this
-        .background(
-            brush = gradient,
-            shape = shape
-        )
-        .clip(shape = shape)
-
 fun Modifier.shimmer(
     shape: Shape,
     baseColor: Color,

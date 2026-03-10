@@ -33,6 +33,7 @@ import ru.myitschool.work.core.ui.state.whenLoading
 import ru.myitschool.work.core.ui.state.whenState
 import ru.myitschool.work.domain.auth.entities.User
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
+import ru.myitschool.work.domain.main.entities.isBooked
 import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 import ru.myitschool.work.ui.common.shimmer
 import ru.myitschool.work.ui.common.withShapeBackground
@@ -60,14 +61,6 @@ fun TopRowSelection(
             .clip(shape = RoundedCornerShape(8.dp)),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        schedule.whenError { errorMessage, _, _ ->
-            Text(
-                text = errorMessage,
-                style = typography.bodyLarge,
-                color = colors.error
-            )
-        }
-
         schedule.whenState(
             ResourceState.Loading::class,
             ResourceState.Refreshing::class,
@@ -150,7 +143,7 @@ fun TopRowSelection(
                     }
 
                     me.whenData { user ->
-                        if (daySchedule.isBooked && daySchedule.bookedBy == user.name) {
+                        if (daySchedule.isBooked && (daySchedule as RoomDaySchedule.Bookend).bookedBy == user.name) {
                             val cancelAllowed = selectedDate == LocalDate.now() && !cancelBookingRequestState.isLoading
 
                             PrimaryGenericButton(

@@ -34,7 +34,7 @@ object BookRepository {
 
             for (i in 0L..2L) {
                 val date = now.plusDays(i)
-                result[date] = dto.getOrDefault(date.toIsoString(), null)?.toEntity() ?: RoomDaySchedule.free()
+                result[date] = dto.getOrDefault(date.toIsoString(), null)?.toEntity() ?: RoomDaySchedule.Free
             }
 
             result

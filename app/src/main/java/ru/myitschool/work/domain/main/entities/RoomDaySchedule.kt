@@ -2,16 +2,13 @@ package ru.myitschool.work.domain.main.entities
 
 import java.time.LocalDateTime
 
-data class RoomDaySchedule(  // TODO
-    val isBooked: Boolean,
-    val bookedBy: String?,
-    val bookedAt: LocalDateTime?
-) {
-    companion object {
-        fun free(): RoomDaySchedule = RoomDaySchedule(
-            isBooked = false,
-            bookedBy = null,
-            bookedAt = null
-        )
-    }
+sealed interface RoomDaySchedule {
+    object Free : RoomDaySchedule
+
+    data class Bookend(
+        val bookedBy: String,
+        val bookedAt: LocalDateTime
+    ) : RoomDaySchedule
 }
+
+val RoomDaySchedule.isBooked: Boolean get() = this is RoomDaySchedule.Bookend

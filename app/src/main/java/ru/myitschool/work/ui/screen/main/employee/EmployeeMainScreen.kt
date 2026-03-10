@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,7 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -42,6 +41,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
+import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 
 @Composable
 fun EmployeeMainScreen(
@@ -57,7 +57,6 @@ fun EmployeeMainScreen(
 
     LaunchedEffect(isRefreshNeeded) {
         if (isRefreshNeeded) {
-            println("!!!!!!!! refresh after book")
             navController.currentBackStackEntry
                 ?.savedStateHandle
                 ?.remove<Boolean>(EmployeeMainResult.REFRESH_KEY)
@@ -105,6 +104,8 @@ private fun ErrorState(
     viewModel: EmployeeMainViewModel,
     state: EmployeeMainState.Error
 ) {
+    val colors = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -116,18 +117,20 @@ private fun ErrorState(
             modifier = Modifier.testTag(TestIds.Main.ERROR),
             text = state.error,
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.Black,
+            color = colors.onBackground
         )
+
         Spacer(modifier = Modifier.size(16.dp))
-        Button(
-            modifier = Modifier.testTag(TestIds.Main.REFRESH_BUTTON).fillMaxWidth(),
+
+        PrimaryGenericButton(
+            modifier = Modifier
+                .testTag(TestIds.Main.REFRESH_BUTTON)
+                .fillMaxWidth(),
+            text = stringResource(R.string.main_refresh),
             onClick = {
-                println("!!!!!!!! refresh on click error")
                 viewModel.onIntent(EmployeeMainIntent.Refresh)
-            },
-        ) {
-            Text(stringResource(R.string.main_refresh))
-        }
+            }
+        )
     }
 }
 
@@ -136,6 +139,8 @@ private fun ContentState(
     viewModel: EmployeeMainViewModel,
     state: EmployeeMainState.Data
 ) {
+    val colors = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier.padding(all = 24.dp)
     ) {
@@ -156,20 +161,22 @@ private fun ContentState(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                 )
+
                 Text(
                     modifier = Modifier
                         .testTag(TestIds.Main.PROFILE_NAME)
                         .padding(horizontal = 4.dp),
                     text = state.name,
                     style = MaterialTheme.typography.headlineSmall,
-                    color = Color.Black,
+                    color = colors.onBackground
                 )
+
                 Spacer(Modifier.weight(1f))
+
                 IconButton(
                     modifier = Modifier.testTag(TestIds.Main.REFRESH_BUTTON),
                     interactionSource = remember { MutableInteractionSource() },
                     onClick = {
-                        println("!!!!!!!! refresh on click main")
                         viewModel.onIntent(EmployeeMainIntent.Refresh)
                     },
                 ) {
@@ -178,6 +185,7 @@ private fun ContentState(
                         contentDescription = stringResource(R.string.main_refresh)
                     )
                 }
+
                 IconButton(
                     modifier = Modifier.testTag(TestIds.Main.LOGOUT_BUTTON),
                     interactionSource = remember { MutableInteractionSource() },
@@ -191,6 +199,7 @@ private fun ContentState(
                     )
                 }
             }
+
             LazyColumn {
                 itemsIndexed(state.books) { index, book ->
                     Row(
@@ -203,14 +212,16 @@ private fun ContentState(
                             modifier = Modifier.testTag(TestIds.Main.ITEM_PLACE),
                             text = book.place,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Black,
+                            color = colors.onBackground
                         )
+
                         Spacer(modifier = Modifier.weight(1f))
+
                         Text(
                             modifier = Modifier.testTag(TestIds.Main.ITEM_DATE),
                             text = book.date,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Black,
+                            color = colors.onBackground
                         )
                     }
                 }
@@ -218,14 +229,18 @@ private fun ContentState(
         }
 
         FloatingActionButton(
-            modifier = Modifier.testTag(TestIds.Main.ADD_BUTTON).align(Alignment.BottomEnd),
+            modifier = Modifier
+                .testTag(TestIds.Main.ADD_BUTTON)
+                .align(Alignment.BottomEnd),
             onClick = {
                 viewModel.onIntent(EmployeeMainIntent.Add)
-            }
+            },
+            containerColor = colors.primary
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_add),
-                contentDescription = stringResource(R.string.book_add)
+                contentDescription = stringResource(R.string.book_add),
+                colorFilter = ColorFilter.tint(color = colors.onPrimary)
             )
         }
     }

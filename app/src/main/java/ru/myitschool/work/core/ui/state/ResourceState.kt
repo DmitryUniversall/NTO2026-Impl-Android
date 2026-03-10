@@ -96,14 +96,12 @@ inline fun <T> ResourceState<T>.whenState(
     val matchesState = states.any { it.isInstance(this) }
 
     val matchesData = when (containsData) {
-        true -> this@whenState.hasData
+        true -> hasData
         false -> hasNoData
         null -> true
     }
 
-    if (matchesState && matchesData) {
-        block(this)
-    }
+    if (matchesState && matchesData) block(this)
 }
 
 inline fun <T> ResourceState<T>.whenState(

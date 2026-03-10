@@ -19,7 +19,7 @@ fun SimpleMessageDialog(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 color = colors.onSurface
             )
@@ -27,7 +27,7 @@ fun SimpleMessageDialog(
         text = {
             Text(
                 text = message,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = colors.onSurface
             )

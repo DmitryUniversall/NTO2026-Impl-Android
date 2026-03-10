@@ -1,7 +1,6 @@
 package ru.myitschool.work.ui.screen.book
 
 import kotlinx.collections.immutable.PersistentList
-import kotlinx.serialization.Serializable
 
 sealed interface BookState {
     data object Loading : BookState

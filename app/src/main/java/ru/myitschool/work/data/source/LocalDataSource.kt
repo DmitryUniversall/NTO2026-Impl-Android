@@ -32,7 +32,7 @@ object LocalDataSource {
             val decrypted = aead.decrypt(encrypted, null)
             jsonCore.decodeFromString<LocalAuthInfo>(decrypted.decodeToString())
         } catch (e: Exception) {
-            Log.e("SecureAuthInfoStorage", "Failed to load auth info: ${e.message}")
+            Log.e("SecureAuthInfoStorage", "Failed to load auth info: ${e.message}", e)
             return@map null
         }
     }

@@ -53,7 +53,8 @@ fun InitScreen(
             Text(
                 text = stringResource(R.string.init_welcome),
                 style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             when (val currentState = state) {
@@ -83,7 +84,8 @@ private fun SuccessView() {
     Text(
         text = stringResource(R.string.success),
         style = MaterialTheme.typography.titleMedium,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -95,7 +97,7 @@ private fun ErrorView(
     Text(
         text = state.errorMessage,
         style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.onBackground
+        color = MaterialTheme.colorScheme.error
     )
 
     PrimaryGenericButton(

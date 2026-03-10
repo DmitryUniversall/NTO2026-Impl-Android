@@ -1,6 +1,5 @@
 package ru.myitschool.work.ui.screen.main.device.ui
 
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import ru.myitschool.work.core.ui.state.ResourceState
 import ru.myitschool.work.core.ui.state.whenData
-import ru.myitschool.work.core.ui.state.whenError
 import ru.myitschool.work.core.ui.state.whenState
 import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
@@ -103,7 +101,6 @@ private fun DayLogBlock(
     schedule: ResourceState<Map<LocalDate, RoomDaySchedule>>
 ) {
     val colors = MaterialTheme.colorScheme
-    val typography = MaterialTheme.typography
 
     val scrollState = rememberScrollState()
 
@@ -115,14 +112,6 @@ private fun DayLogBlock(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        schedule.whenError { errorMessage, _, _ ->
-            Text(
-                text = errorMessage,
-                style = typography.bodyLarge,
-                color = colors.error
-            )
-        }
-
         schedule.whenState(
             ResourceState.Loading::class,
             ResourceState.Refreshing::class,
@@ -144,12 +133,12 @@ private fun DayLogBlock(
 
         schedule.whenData { data ->
             val daySchedule = data[date]!!  // TODO: Unsafe
-            Log.d("Test", "booked by: ${daySchedule.bookedBy}")
-            if (daySchedule.isBooked) {
+
+            if (daySchedule is RoomDaySchedule.Bookend) {
                 BookingLogItem(
                     info = BookingLogInfo.Book(
-                        bookedAt = daySchedule.bookedAt!!,
-                        bookedBy = daySchedule.bookedBy!!
+                        bookedAt = daySchedule.bookedAt,
+                        bookedBy = daySchedule.bookedBy
                     )
                 )
             }

@@ -1,5 +1,6 @@
 package ru.myitschool.work.ui.screen.main.device
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -28,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
-import ru.myitschool.work.core.ui.state.isFetching
+import ru.myitschool.work.core.ui.state.whenError
 import ru.myitschool.work.core.utils.toHHMM
 import ru.myitschool.work.ui.common.muted
 import ru.myitschool.work.ui.screen.main.device.ui.ScheduleSelection
@@ -55,7 +57,8 @@ fun DeviceMainScreen(
     Column(
         modifier = Modifier
             .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
@@ -90,9 +93,9 @@ fun DeviceMainScreen(
                     onClick = {
                         viewModel.onIntent(DeviceMainIntent.Refresh)
                     },
-                    enabled = !uiState.schedule.isFetching
+                    enabled = !uiState.isFetching
                 ) {
-                    if (uiState.schedule.isFetching) {
+                    if (uiState.isFetching) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp)
                         )
@@ -128,10 +131,28 @@ fun DeviceMainScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(24.dp)
+                    .wrapContentHeight()
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TopRowSelection(viewModel = viewModel, selectedDate = uiState.selectedDate, schedule = uiState.schedule, bookRequestState = uiState.bookRequest, cancelBookingRequestState = uiState.cancelBookingRequest, me = uiState.me)
+                uiState.schedule.whenError { errorMessage, _, _ ->
+                    Text(
+                        text = errorMessage,
+                        style = typography.bodyLarge,
+                        color = colors.error
+                    )
+                }
+
+                TopRowSelection(
+                    viewModel = viewModel,
+                    selectedDate = uiState.selectedDate,
+                    schedule = uiState.schedule,
+                    bookRequestState = uiState.bookRequest,
+                    cancelBookingRequestState = uiState.cancelBookingRequest,
+                    me = uiState.me
+                )
                 ScheduleSelection(viewModel = viewModel, selectedDate = uiState.selectedDate, schedule = uiState.schedule)
             }
         }

@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,7 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,6 +53,7 @@ import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import ru.myitschool.work.R
 import ru.myitschool.work.core.TestIds
+import ru.myitschool.work.ui.common.components.button.PrimaryGenericButton
 import ru.myitschool.work.ui.screen.main.employee.EmployeeMainResult
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -116,6 +116,8 @@ private fun LoadingState() {
 
 @Composable
 private fun EmptyState() {
+    val colors = MaterialTheme.colorScheme
+
     Box(
         Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -124,7 +126,7 @@ private fun EmptyState() {
             modifier = Modifier.testTag(TestIds.Book.EMPTY),
             text = stringResource(R.string.book_empty),
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.Black,
+            color = colors.onBackground,
         )
     }
 }
@@ -134,6 +136,8 @@ private fun ErrorState(
     viewModel: BookViewModel,
     state: BookState.Error
 ) {
+    val colors = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -145,17 +149,20 @@ private fun ErrorState(
             modifier = Modifier.testTag(TestIds.Book.ERROR),
             text = state.error,
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.Black,
+            color = colors.error,
         )
+
         Spacer(modifier = Modifier.size(16.dp))
-        Button(
-            modifier = Modifier.testTag(TestIds.Book.REFRESH_BUTTON).fillMaxWidth(),
+
+        PrimaryGenericButton(
+            text = stringResource(R.string.main_refresh),
+            modifier = Modifier
+                .testTag(TestIds.Book.REFRESH_BUTTON)
+                .fillMaxWidth(),
             onClick = {
                 viewModel.onIntent(BookIntent.Refresh)
-            },
-        ) {
-            Text(stringResource(R.string.main_refresh))
-        }
+            }
+        )
     }
 }
 
@@ -164,14 +171,19 @@ private fun ContentState(
     viewModel: BookViewModel,
     state: BookState.Data
 ) {
+    val colors = MaterialTheme.colorScheme
+
     val navController = rememberNavController()
     val startDestination = SelectedTabDestination(index = 0)
+
     var selectedDestination by rememberSaveable {
         mutableIntStateOf(startDestination.index)
     }
+
     var selectedPlaceId by rememberSaveable {
         mutableStateOf<String?>(null)
     }
+
     Box {
         Column {
             PrimaryTabRow(
@@ -201,7 +213,8 @@ private fun ContentState(
                                         )
                                     ),
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                color = colors.onSurface
                             )
                         }
                     )
@@ -234,11 +247,13 @@ private fun ContentState(
                             )
                         )
                     }
-                }
+                },
+                containerColor = colors.primary
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_check),
-                    contentDescription = stringResource(R.string.book_add)
+                    contentDescription = stringResource(R.string.book_add),
+                    colorFilter = ColorFilter.tint(color = colors.onPrimary)
                 )
             }
         }
@@ -253,6 +268,8 @@ fun TabNavHost(
     state: BookState.Data,
     onPlaceSelected: (String) -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
+
     NavHost(
         modifier = modifier,
         enterTransition = { EnterTransition.None },
@@ -298,6 +315,7 @@ fun TabNavHost(
                                 .padding(start = 16.dp),
                             text = place.name,
                             style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onBackground
                         )
                     }
                 }

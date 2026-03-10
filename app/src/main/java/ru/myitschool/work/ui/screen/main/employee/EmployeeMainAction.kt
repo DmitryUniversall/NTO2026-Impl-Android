@@ -6,5 +6,5 @@ sealed interface EmployeeMainAction {
     class Navigate(
         val destination: AppDestination,
         val clearBackStack: Boolean = false
-    ): EmployeeMainAction
+    ) : EmployeeMainAction
 }

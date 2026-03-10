@@ -1,6 +1,7 @@
 package ru.myitschool.work.ui.screen.main.device
 
 import ru.myitschool.work.core.ui.state.ResourceState
+import ru.myitschool.work.core.ui.state.isFetching
 import ru.myitschool.work.domain.auth.entities.User
 import ru.myitschool.work.domain.main.entities.RoomDaySchedule
 import java.time.LocalDate
@@ -14,6 +15,8 @@ data class DeviceMainState(
     val cancelBookingRequest: ResourceState<Unit>,
     val me: ResourceState<User>,
 ) {
+    val isFetching get() = schedule.isFetching
+
     companion object {
         fun empty(): DeviceMainState = DeviceMainState(
             currentDateTime = LocalDateTime.now(),

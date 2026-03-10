@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.myitschool.work.core.ui.state.ResourceState
 import ru.myitschool.work.core.ui.state.isFetching
+import ru.myitschool.work.core.ui.state.toError
 import ru.myitschool.work.core.ui.state.toIdle
 import ru.myitschool.work.core.ui.state.toLoading
 import ru.myitschool.work.core.ui.state.toRefreshing
@@ -44,7 +45,10 @@ class DeviceMainViewModel : ViewModel() {
             loadMe()
 
             withContext(Dispatchers.Default) {
-                while (true) updater()
+                while (true) {
+                    updater()
+                    delay(10000)
+                }
             }
         }
     }
@@ -54,18 +58,17 @@ class DeviceMainViewModel : ViewModel() {
 
     fun onIntent(intent: DeviceMainIntent) {
         when (intent) {
-            is DeviceMainIntent.SelectDate -> _uiState.update { it.copy(selectedDate = intent.date) }
-            is DeviceMainIntent.BookForToday -> viewModelScope.launch { bookForToday(); loadSchedule(refresh = true) }
-            is DeviceMainIntent.CancelBooking -> viewModelScope.launch { cancelBooking(); loadSchedule(refresh = true) }
             is DeviceMainIntent.Logout -> viewModelScope.launch { logoutUseCase.invoke() }
-            is DeviceMainIntent.Refresh -> viewModelScope.launch { loadSchedule(refresh = true); _uiState.update { it.copy(bookRequest = it.bookRequest.toIdle()) } }
+            is DeviceMainIntent.SelectDate -> _uiState.update { it.copy(selectedDate = intent.date) }
+            is DeviceMainIntent.Refresh -> viewModelScope.launch { updater(); _uiState.update { it.copy(bookRequest = it.bookRequest.toIdle()) } }
+            is DeviceMainIntent.BookForToday -> viewModelScope.launch { bookForToday(); updater() }
+            is DeviceMainIntent.CancelBooking -> viewModelScope.launch { cancelBooking(); updater() }
         }
     }
 
     private suspend fun updater() {
         _uiState.update { it.copy(currentDateTime = LocalDateTime.now()) }
         loadSchedule(refresh = true)
-        delay(10000)
     }
 
     private suspend fun cancelBooking() {
@@ -76,8 +79,6 @@ class DeviceMainViewModel : ViewModel() {
 
         _uiState.update { it.copy(cancelBookingRequest = it.cancelBookingRequest.toLoading()) }
 
-        delay(2000)
-
         _uiState.update {
             it.copy(
                 cancelBookingRequest = cancelBookingUseCase.invoke().fold(
@@ -85,7 +86,7 @@ class DeviceMainViewModel : ViewModel() {
                         ResourceState.Success(Unit)
                     },
                     onFailure = { error ->
-                        ResourceState.Error(error.message ?: "Unknown error", error)
+                        it.cancelBookingRequest.toError(error.message ?: "Unknown error", error)
                     }
                 )
             )
@@ -100,13 +101,11 @@ class DeviceMainViewModel : ViewModel() {
 
         _uiState.update { it.copy(me = it.me.toLoading()) }
 
-        delay(2000)
-
         val state = getAuthFlowUseCase.invoke().first()
 
         _uiState.update {
             it.copy(
-                me = if (state is AuthState.Authenticated) ResourceState.Success(state.user) else ResourceState.Error("Unauthorized")
+                me = if (state is AuthState.Authenticated) ResourceState.Success(state.user) else it.me.toError("Unauthorized")
             )
         }
     }
@@ -119,8 +118,6 @@ class DeviceMainViewModel : ViewModel() {
 
         _uiState.update { it.copy(schedule = if (refresh) it.schedule.toRefreshing() else it.schedule.toLoading()) }
 
-        delay(2000)
-
         _uiState.update {
             it.copy(
                 schedule = getRoomScheduleUseCase.invoke().fold(
@@ -128,7 +125,7 @@ class DeviceMainViewModel : ViewModel() {
                         ResourceState.Success(schedule)
                     },
                     onFailure = { error ->
-                        ResourceState.Error("Failed to load schedule: ${error.message}", error)
+                        it.schedule.toError("Failed to load schedule: ${error.message}", error)
                     }
                 )
             )
@@ -142,8 +139,6 @@ class DeviceMainViewModel : ViewModel() {
         }
 
         _uiState.update { it.copy(bookRequest = it.bookRequest.toLoading()) }
-
-        delay(2000)
 
         _uiState.update {
             it.copy(
